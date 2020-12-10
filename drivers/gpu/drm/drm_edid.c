@@ -4385,6 +4385,8 @@ static void drm_add_display_info(struct drm_connector *connector,
 				 struct edid *edid)
 {
 	struct drm_display_info *info = &connector->display_info;
+	struct detailed_timing *timing;
+	int i;
 
 	info->width_mm = edid->width_cm * 10;
 	info->height_mm = edid->height_cm * 10;
@@ -4406,6 +4408,18 @@ static void drm_add_display_info(struct drm_connector *connector,
 		return;
 
 	drm_parse_cea_ext(connector, edid);
+
+	// check if declear display range limit
+	for (i = 0; i < EDID_DETAILED_TIMINGS; i++)
+	{
+		timing = &edid->detailed_timings[i];
+		if(timing->pixel_clock == 0 &&
+			timing->data.other_data.type == 0xfd)
+		{
+			info->max_tmds_clock = 10000 *
+			timing->data.other_data.data.range.pixel_clock_mhz;
+		}
+	}
 
 	/*
 	 * Digital sink with "DFP 1.x compliant TMDS" according to EDID 1.3?
