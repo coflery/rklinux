@@ -151,6 +151,126 @@
 #define TMDS_DATA_CH1_OUTPUT_SWING(x)		UPDATE(x, 7, 4)
 #define TMDS_DATA_CH0_OUTPUT_SWING(x)		UPDATE(x, 3, 0)
 
+
+
+
+/* REG: 0x01 */
+#define RK3328_BYPASS_RXSENSE_EN			BIT(2)
+#define RK3328_BYPASS_POWERON_EN			BIT(1)
+#define RK3328_BYPASS_PLLPD_EN				BIT(0)
+/* REG: 0x02 */
+#define RK3328_INT_POL_HIGH				BIT(7)
+#define RK3328_BYPASS_PDATA_EN				BIT(4)
+#define RK3328_PDATA_EN					BIT(0)
+/* REG:0x05 */
+#define RK3328_INT_TMDS_CLK(x)				UPDATE(x, 7, 4)
+#define RK3328_INT_TMDS_D2(x)				UPDATE(x, 3, 0)
+/* REG:0x07 */
+#define RK3328_INT_TMDS_D1(x)				UPDATE(x, 7, 4)
+#define RK3328_INT_TMDS_D0(x)				UPDATE(x, 3, 0)
+/* for all RK3328_INT_TMDS_*, ESD_DET as defined in 0xc8-0xcb */
+#define RK3328_INT_AGND_LOW_PULSE_LOCKED		BIT(3)
+#define RK3328_INT_RXSENSE_LOW_PULSE_LOCKED		BIT(2)
+#define RK3328_INT_VSS_AGND_ESD_DET			BIT(1)
+#define RK3328_INT_AGND_VSS_ESD_DET			BIT(0)
+/* REG: 0xa0 */
+#define RK3328_PCLK_VCO_DIV_5_MASK			BIT(1)
+#define RK3328_PCLK_VCO_DIV_5(x)			UPDATE(x, 1, 1)
+#define RK3328_PRE_PLL_POWER_DOWN			BIT(0)
+/* REG: 0xa1 */
+#define RK3328_PRE_PLL_PRE_DIV_MASK			GENMASK(5, 0)
+#define RK3328_PRE_PLL_PRE_DIV(x)			UPDATE(x, 5, 0)
+/* REG: 0xa2 */
+/* unset means center spread */
+#define RK3328_SPREAD_SPECTRUM_MOD_DOWN			BIT(7)
+#define RK3328_SPREAD_SPECTRUM_MOD_DISABLE		BIT(6)
+#define RK3328_PRE_PLL_FRAC_DIV_DISABLE			UPDATE(3, 5, 4)
+#define RK3328_PRE_PLL_FB_DIV_11_8_MASK			GENMASK(3, 0)
+#define RK3328_PRE_PLL_FB_DIV_11_8(x)			UPDATE((x) >> 8, 3, 0)
+/* REG: 0xa3 */
+#define RK3328_PRE_PLL_FB_DIV_7_0(x)			UPDATE(x, 7, 0)
+/* REG: 0xa4*/
+#define RK3328_PRE_PLL_TMDSCLK_DIV_C_MASK		GENMASK(1, 0)
+#define RK3328_PRE_PLL_TMDSCLK_DIV_C(x)			UPDATE(x, 1, 0)
+#define RK3328_PRE_PLL_TMDSCLK_DIV_B_MASK		GENMASK(3, 2)
+#define RK3328_PRE_PLL_TMDSCLK_DIV_B(x)			UPDATE(x, 3, 2)
+#define RK3328_PRE_PLL_TMDSCLK_DIV_A_MASK		GENMASK(5, 4)
+#define RK3328_PRE_PLL_TMDSCLK_DIV_A(x)			UPDATE(x, 5, 4)
+/* REG: 0xa5 */
+#define RK3328_PRE_PLL_PCLK_DIV_B_SHIFT			5
+#define RK3328_PRE_PLL_PCLK_DIV_B_MASK			GENMASK(6, 5)
+#define RK3328_PRE_PLL_PCLK_DIV_B(x)			UPDATE(x, 6, 5)
+#define RK3328_PRE_PLL_PCLK_DIV_A_MASK			GENMASK(4, 0)
+#define RK3328_PRE_PLL_PCLK_DIV_A(x)			UPDATE(x, 4, 0)
+/* REG: 0xa6 */
+#define RK3328_PRE_PLL_PCLK_DIV_C_SHIFT			5
+#define RK3328_PRE_PLL_PCLK_DIV_C_MASK			GENMASK(6, 5)
+#define RK3328_PRE_PLL_PCLK_DIV_C(x)			UPDATE(x, 6, 5)
+#define RK3328_PRE_PLL_PCLK_DIV_D_MASK			GENMASK(4, 0)
+#define RK3328_PRE_PLL_PCLK_DIV_D(x)			UPDATE(x, 4, 0)
+/* REG: 0xa9 */
+#define RK3328_PRE_PLL_LOCK_STATUS			BIT(0)
+/* REG: 0xaa */
+#define RK3328_POST_PLL_POST_DIV_ENABLE			GENMASK(3, 2)
+#define RK3328_POST_PLL_REFCLK_SEL_TMDS			BIT(1)
+#define RK3328_POST_PLL_POWER_DOWN			BIT(0)
+/* REG:0xab */
+#define RK3328_POST_PLL_FB_DIV_8(x)			UPDATE((x) >> 8, 7, 7)
+#define RK3328_POST_PLL_PRE_DIV(x)			UPDATE(x, 4, 0)
+/* REG: 0xac */
+#define RK3328_POST_PLL_FB_DIV_7_0(x)			UPDATE(x, 7, 0)
+/* REG: 0xad */
+#define RK3328_POST_PLL_POST_DIV_MASK			GENMASK(1, 0)
+#define RK3328_POST_PLL_POST_DIV_2			0x0
+#define RK3328_POST_PLL_POST_DIV_4			0x1
+#define RK3328_POST_PLL_POST_DIV_8			0x3
+/* REG: 0xaf */
+#define RK3328_POST_PLL_LOCK_STATUS			BIT(0)
+/* REG: 0xb0 */
+#define RK3328_BANDGAP_ENABLE				BIT(2)
+/* REG: 0xb2 */
+#define RK3328_TMDS_CLK_DRIVER_EN			BIT(3)
+#define RK3328_TMDS_D2_DRIVER_EN			BIT(2)
+#define RK3328_TMDS_D1_DRIVER_EN			BIT(1)
+#define RK3328_TMDS_D0_DRIVER_EN			BIT(0)
+#define RK3328_TMDS_DRIVER_ENABLE		(RK3328_TMDS_CLK_DRIVER_EN | \
+						RK3328_TMDS_D2_DRIVER_EN | \
+						RK3328_TMDS_D1_DRIVER_EN | \
+						RK3328_TMDS_D0_DRIVER_EN)
+/* REG:0xc5 */
+#define RK3328_BYPASS_TERM_RESISTOR_CALIB		BIT(7)
+#define RK3328_TERM_RESISTOR_CALIB_SPEED_14_8(x)	UPDATE((x) >> 8, 6, 0)
+/* REG:0xc6 */
+#define RK3328_TERM_RESISTOR_CALIB_SPEED_7_0(x)		UPDATE(x, 7, 0)
+/* REG:0xc7 */
+#define RK3328_TERM_RESISTOR_50				UPDATE(0, 2, 1)
+#define RK3328_TERM_RESISTOR_62_5			UPDATE(1, 2, 1)
+#define RK3328_TERM_RESISTOR_75				UPDATE(2, 2, 1)
+#define RK3328_TERM_RESISTOR_100			UPDATE(3, 2, 1)
+/* REG 0xc8 - 0xcb */
+#define RK3328_ESD_DETECT_MASK				GENMASK(7, 6)
+#define RK3328_ESD_DETECT_340MV				(0x0 << 6)
+#define RK3328_ESD_DETECT_280MV				(0x1 << 6)
+#define RK3328_ESD_DETECT_260MV				(0x2 << 6)
+#define RK3328_ESD_DETECT_240MV				(0x3 << 6)
+/* resistors can be used in parallel */
+#define RK3328_TMDS_TERM_RESIST_MASK			GENMASK(5, 0)
+#define RK3328_TMDS_TERM_RESIST_75			BIT(5)
+#define RK3328_TMDS_TERM_RESIST_150			BIT(4)
+#define RK3328_TMDS_TERM_RESIST_300			BIT(3)
+#define RK3328_TMDS_TERM_RESIST_600			BIT(2)
+#define RK3328_TMDS_TERM_RESIST_1000			BIT(1)
+#define RK3328_TMDS_TERM_RESIST_2000			BIT(0)
+/* REG: 0xd1 */
+#define RK3328_PRE_PLL_FRAC_DIV_23_16(x)		UPDATE((x) >> 16, 7, 0)
+/* REG: 0xd2 */
+#define RK3328_PRE_PLL_FRAC_DIV_15_8(x)			UPDATE((x) >> 8, 7, 0)
+/* REG: 0xd3 */
+#define RK3328_PRE_PLL_FRAC_DIV_7_0(x)			UPDATE(x, 7, 0)
+
+
+
+
 enum inno_hdmi_phy_type {
 	INNO_HDMI_PHY_RK3228,
 	INNO_HDMI_PHY_RK3328
@@ -364,6 +484,10 @@ static inline void inno_update_bits(struct inno_hdmi_phy *inno, u8 reg,
 	regmap_update_bits(inno->regmap, reg * 4, mask, val);
 }
 
+#define inno_poll(inno, reg, val, cond, sleep_us, timeout_us) \
+	regmap_read_poll_timeout((inno)->regmap, (reg) * 4, val, cond, \
+				 sleep_us, timeout_us)
+
 static u32 inno_hdmi_phy_get_tmdsclk(struct inno_hdmi_phy *inno, int rate)
 {
 	int bus_width = phy_get_bus_width(inno->phy);
@@ -503,6 +627,23 @@ static const struct phy_ops inno_hdmi_phy_ops = {
 	.power_off = inno_hdmi_phy_power_off,
 };
 
+static const
+struct pre_pll_config *inno_hdmi_phy_get_pre_pll_cfg(struct inno_hdmi_phy *inno,
+						     unsigned long rate)
+{
+	const struct pre_pll_config *cfg = pre_pll_cfg_table;
+	unsigned long tmdsclock = inno_hdmi_phy_get_tmdsclk(inno, rate);
+
+	for (; cfg->pixclock != 0; cfg++)
+		if (cfg->pixclock == rate && cfg->tmdsclock == tmdsclock)
+			break;
+
+	if (cfg->pixclock == 0)
+		return ERR_PTR(-EINVAL);
+
+	return cfg;
+}
+
 static int inno_hdmi_phy_clk_is_prepared(struct clk_hw *hw)
 {
 	struct inno_hdmi_phy *inno = to_inno_hdmi_phy(hw);
@@ -544,44 +685,55 @@ static unsigned long inno_hdmi_phy_clk_recalc_rate(struct clk_hw *hw,
 						   unsigned long parent_rate)
 {
 	struct inno_hdmi_phy *inno = to_inno_hdmi_phy(hw);
+	unsigned long frac;
+	u8 nd, no_a, no_b, no_d;
+	u64 vco;
+	u16 nf;
 
-	if (inno->plat_data->ops->recalc_rate)
-		return inno->plat_data->ops->recalc_rate(inno, parent_rate);
-	else
+	nd = inno_read(inno, 0xa1) & RK3328_PRE_PLL_PRE_DIV_MASK;
+	nf = ((inno_read(inno, 0xa2) & RK3328_PRE_PLL_FB_DIV_11_8_MASK) << 8);
+	nf |= inno_read(inno, 0xa3);
+	vco = parent_rate * nf;
+
+	if (!(inno_read(inno, 0xa2) & RK3328_PRE_PLL_FRAC_DIV_DISABLE)) {
+		frac = inno_read(inno, 0xd3) |
+		       (inno_read(inno, 0xd2) << 8) |
+		       (inno_read(inno, 0xd1) << 16);
+		vco += DIV_ROUND_CLOSEST(parent_rate * frac, (1 << 24));
+	}
+
+	if (inno_read(inno, 0xa0) & RK3328_PCLK_VCO_DIV_5_MASK) {
+		do_div(vco, nd * 5);
+	} else {
+		no_a = inno_read(inno, 0xa5) & RK3328_PRE_PLL_PCLK_DIV_A_MASK;
+		no_b = inno_read(inno, 0xa5) & RK3328_PRE_PLL_PCLK_DIV_B_MASK;
+		no_b >>= RK3328_PRE_PLL_PCLK_DIV_B_SHIFT;
+		no_b += 2;
+		no_d = inno_read(inno, 0xa6) & RK3328_PRE_PLL_PCLK_DIV_D_MASK;
+
+		do_div(vco, (nd * (no_a == 1 ? no_b : no_a) * no_d * 2));
+	}
+
+	inno->pixclock = DIV_ROUND_CLOSEST((unsigned long)vco, 1000) * 1000;
+
+	dev_dbg(inno->dev, "%s rate %lu vco %llu\n",
+		__func__, inno->pixclock, vco);
+
 		return inno->pixclock;
 }
 
 static long inno_hdmi_phy_clk_round_rate(struct clk_hw *hw, unsigned long rate,
 					 unsigned long *parent_rate)
 {
-	int i;
 	const struct pre_pll_config *cfg = pre_pll_cfg_table;
-	struct inno_hdmi_phy *inno = to_inno_hdmi_phy(hw);
-	u32 tmdsclock = inno_hdmi_phy_get_tmdsclk(inno, rate);
 
-	for (; cfg->pixclock != ~0UL; cfg++)
+	rate = (rate / 1000) * 1000;
+
+	for (; cfg->pixclock != 0; cfg++)
 		if (cfg->pixclock == rate)
 			break;
 
-	/* XXX: Limit pixel clock under 600MHz */
-	if (cfg->pixclock > 600000000)
-		return -EINVAL;
-
-	/*
-	 * If there is no dts phy cfg table, use default phy cfg table.
-	 * The tmds clock maximum is 594MHz. So there is no need to check
-	 * whether tmds clock is out of range.
-	 */
-	if (!inno->phy_cfg)
-		return cfg->pixclock;
-
-	/* Check if tmds clock is out of dts phy config's range. */
-	for (i = 0; inno->phy_cfg[i].tmdsclock != ~0UL; i++) {
-		if (inno->phy_cfg[i].tmdsclock >= tmdsclock)
-			break;
-	}
-
-	if (inno->phy_cfg[i].tmdsclock == ~0UL)
+	if (cfg->pixclock == 0)
 		return -EINVAL;
 
 	return cfg->pixclock;
@@ -592,25 +744,53 @@ static int inno_hdmi_phy_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 {
 	struct inno_hdmi_phy *inno = to_inno_hdmi_phy(hw);
 	const struct pre_pll_config *cfg = pre_pll_cfg_table;
-	u32 tmdsclock = inno_hdmi_phy_get_tmdsclk(inno, rate);
+	unsigned long tmdsclock = inno_hdmi_phy_get_tmdsclk(inno, rate);
+	u32 val;
+	int ret;
 
-	dev_dbg(inno->dev, "%s rate %lu tmdsclk %u\n",
+	dev_dbg(inno->dev, "%s rate %lu tmdsclk %lu\n",
 		__func__, rate, tmdsclock);
 
-	if (inno->tmdsclock == tmdsclock)
+	if (inno->pixclock == rate && inno->tmdsclock == tmdsclock)
 		return 0;
 
-	for (; cfg->pixclock != ~0UL; cfg++)
-		if (cfg->pixclock == rate && cfg->tmdsclock == tmdsclock)
-			break;
+	cfg = inno_hdmi_phy_get_pre_pll_cfg(inno, rate);
+	if (IS_ERR(cfg))
+		return PTR_ERR(cfg);
 
-	if (cfg->pixclock == ~0UL) {
-		dev_err(inno->dev, "unsupported rate %lu\n", rate);
-		return -EINVAL;
+	inno_update_bits(inno, 0xa0, RK3328_PRE_PLL_POWER_DOWN,
+			 RK3328_PRE_PLL_POWER_DOWN);
+
+	/* Configure pre-pll */
+	inno_update_bits(inno, 0xa0, RK3328_PCLK_VCO_DIV_5_MASK,
+			 RK3328_PCLK_VCO_DIV_5(cfg->vco_div_5_en));
+	inno_write(inno, 0xa1, RK3328_PRE_PLL_PRE_DIV(cfg->prediv));
+
+	val = RK3328_SPREAD_SPECTRUM_MOD_DISABLE;
+	if (!cfg->fracdiv)
+		val |= RK3328_PRE_PLL_FRAC_DIV_DISABLE;
+	inno_write(inno, 0xa2, RK3328_PRE_PLL_FB_DIV_11_8(cfg->fbdiv) | val);
+	inno_write(inno, 0xa3, RK3328_PRE_PLL_FB_DIV_7_0(cfg->fbdiv));
+	inno_write(inno, 0xa5, RK3328_PRE_PLL_PCLK_DIV_A(cfg->pclk_div_a) |
+		   RK3328_PRE_PLL_PCLK_DIV_B(cfg->pclk_div_b));
+	inno_write(inno, 0xa6, RK3328_PRE_PLL_PCLK_DIV_C(cfg->pclk_div_c) |
+		   RK3328_PRE_PLL_PCLK_DIV_D(cfg->pclk_div_d));
+	inno_write(inno, 0xa4, RK3328_PRE_PLL_TMDSCLK_DIV_C(cfg->tmds_div_c) |
+		   RK3328_PRE_PLL_TMDSCLK_DIV_A(cfg->tmds_div_a) |
+		   RK3328_PRE_PLL_TMDSCLK_DIV_B(cfg->tmds_div_b));
+	inno_write(inno, 0xd3, RK3328_PRE_PLL_FRAC_DIV_7_0(cfg->fracdiv));
+	inno_write(inno, 0xd2, RK3328_PRE_PLL_FRAC_DIV_15_8(cfg->fracdiv));
+	inno_write(inno, 0xd1, RK3328_PRE_PLL_FRAC_DIV_23_16(cfg->fracdiv));
+
+	inno_update_bits(inno, 0xa0, RK3328_PRE_PLL_POWER_DOWN, 0);
+
+	/* Wait for Pre-PLL lock */
+	ret = inno_poll(inno, 0xa9, val, val & RK3328_PRE_PLL_LOCK_STATUS,
+			1000, 10000);
+	if (ret) {
+		dev_err(inno->dev, "Pre-PLL locking failed\n");
+		return ret;
 	}
-
-	if (inno->plat_data->ops->pre_pll_update)
-		inno->plat_data->ops->pre_pll_update(inno, cfg);
 
 	inno->pixclock = rate;
 	inno->tmdsclock = tmdsclock;
