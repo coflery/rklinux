@@ -5,44 +5,20 @@
 	model = "Firefly rk3328-firefly-aiojd4";
 	compatible = "rockchip,rk3328-firefly-aiojd4", "rockchip,rk3328";
 
-	wireless-wlan {
-		compatible = "wlan-platdata";
-		rockchip,grf = <&grf>;
-		clocks = <&rk805 1>;
-		clock-names = "ext_clock";
-		wifi_chip_type = "rtl8723ds";
-		sdio_vref = <1800>;
-		WIFI,host_wake_irq = <&gpio3 RK_PA1 GPIO_ACTIVE_HIGH>;
-		status = "okay";
-	};
-
-    wireless-bluetooth {
-		compatible = "bluetooth-platdata";
-		clocks = <&cru SCLK_RTC32K>;
-		clock-names = "ext_clock";
-		BT,power_gpio = <&gpio0 RK_PD6 GPIO_ACTIVE_HIGH>;
-		BT,wake_host_irq = <&gpio1 RK_PD2 GPIO_ACTIVE_HIGH>;
-		status = "okay";
-	};
-
-	fiq-debugger {
-		status = "disabled";
-	};
-
 	leds {
 		compatible = "gpio-leds";
 
 		power {
 			label = "firefly:yellow:user";
 			linux,default-trigger = "ir-power-click";
-			gpios = <&rk805 1 GPIO_ACTIVE_HIGH>;
+			gpios = <&rk805 1 GPIO_ACTIVE_LOW>;
 			default-state = "on";
 		};
 
 		user {
 			label = "firefly:blue:power";
 			linux,default-trigger = "ir-user-click";
-			gpios = <&rk805 0 GPIO_ACTIVE_HIGH>;
+			gpios = <&rk805 0 GPIO_ACTIVE_LOW>;
 			default-state = "on";
 		};
 	};
@@ -55,9 +31,22 @@
 	};
 };
 
+&uart0 {
+       pinctrl-names = "default";
+       pinctrl-0 = <&uart0_xfer>;
+       status = "okay";
+};
+
+&uart1 {
+       pinctrl-names = "default";
+       pinctrl-0 = <&uart1_xfer>;
+       status = "disable";
+};
+
 &uart2 {
-	dma-names = "tx", "rx";
-	status = "okay";
+       pinctrl-names = "default";
+       pinctrl-0 = "&uart2m1_xfer";
+       status = "disable";
 };
 
 &vccio_sd {
@@ -70,70 +59,16 @@
 	status = "disabled";
 };
 
-&gmac_clkin {
-	clock-frequency = <50000000>;
-};
-
 &sdio_pwrseq {
 	reset-gpios = <&gpio3 RK_PB0 GPIO_ACTIVE_LOW>;
-};
-
-&gmac2io {
-	phy-mode = "rmii";
-	clock_in_out = "output";
-	assigned-clocks = <&cru SCLK_MAC2IO_REFOUT>;
-	assigned-clock-parents = <&gmac_clkin>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&rmiim1_pins &gmac_reset>;
-	status = "okay";
 };
 
 &codec {
 	io-channels = <&saradc 0>;
 	hp-det-adc-value = <1800>;
-	rk3328-codec-spk-gpiomute;
 };
 
 &pinctrl {
-
-	sdio-pwrseq {
-		wifi_enable_h: wifi-enable-h {
-			rockchip,pins =
-				<3 RK_PB0 RK_FUNC_GPIO &pcfg_pull_none>;
-		};
-	};
-
-	gmac2phy {
-		gmac_reset: gamc-reset {
-			rockchip,pins =
-				<1 18 RK_FUNC_GPIO &pcfg_pull_none>;
-		};
-	};
-
-	gmac-1 {
-		rmiim1_pins: rmiim1-pins {
-		    rockchip,pins =
-		        /* mac_mdio */
-		        <1 RK_PC3 RK_FUNC_2 &pcfg_pull_none_2ma>,
-		        /* mac_txen */
-		        <1 RK_PD1 RK_FUNC_2 &pcfg_pull_none_12ma>,
-		        /* mac_clk */
-		        <1 RK_PC5 RK_FUNC_2 &pcfg_pull_none_2ma>,
-		        /* mac_rxdv */
-		        <1 RK_PC6 RK_FUNC_2 &pcfg_pull_none_2ma>,
-		        /* mac_mdc */
-		        <1 RK_PC7 RK_FUNC_2 &pcfg_pull_none_2ma>,
-		        /* mac_rxd1 */
-		        <1 RK_PB2 RK_FUNC_2 &pcfg_pull_none_2ma>,
-		        /* mac_rxd0 */
-		        <1 RK_PB3 RK_FUNC_2 &pcfg_pull_none_2ma>,
-		        /* mac_txd1 */
-		        <1 RK_PB0 RK_FUNC_2 &pcfg_pull_none_12ma>,
-		        /* mac_txd0 */
-		        <1 RK_PB1 RK_FUNC_2 &pcfg_pull_none_12ma>;
-		};
-	};
-
 	vccio-sd {
 		sd_pwr_1800_sel:sd-pwr-1800-sel {
 			rockchip,pins =
@@ -165,10 +100,6 @@
 	supports-sdio;
 	status = "okay";
 	vmmc-supply = <&vcc_io>;
-};
-
-&uart1 {
-	status = "disabled";
 };
 
 &usb20_otg {

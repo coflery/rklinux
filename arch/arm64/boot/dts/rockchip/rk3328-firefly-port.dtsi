@@ -4,13 +4,6 @@
 / {
 	compatible = "firefly,rk3328-firefly-port", "rockchip,rk3328";
 
-	gmac_clkin: external-gmac-clock {
-		compatible = "fixed-clock";
-		clock-frequency = <125000000>;
-		clock-output-names = "gmac_clkin";
-		#clock-cells = <0>;
-	};
-
 	sdio_pwrseq: sdio-pwrseq {
 		compatible = "mmc-pwrseq-simple";
 		pinctrl-names = "default";
@@ -133,31 +126,13 @@
 	status = "okay";
 };
 
-&gmac2io {
-	phy-supply = <&vcc_phy>;
-	phy-mode = "rgmii";
-	clock_in_out = "input";
-	snps,reset-gpio = <&gpio1 RK_PC2 GPIO_ACTIVE_LOW>;
-	snps,reset-active-low;
-	snps,force_thresh_dma_mode;
-	snps,reset-delays-us = <0 10000 50000>;
-	assigned-clocks = <&cru SCLK_MAC2IO>, <&cru SCLK_MAC2IO_EXT>;
-	assigned-clock-parents = <&gmac_clkin>, <&gmac_clkin>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&rgmiim1_pins>;
-	tx_delay = <0x28>;
-	rx_delay = <0x16>;
-	status = "okay";
-};
-
 &gmac2phy {
-	phy-supply = <&vcc_phy>;
-	clock_in_out = "output";
-	assigned-clocks = <&cru SCLK_MAC2PHY_SRC>;
-	assigned-clock-rate = <50000000>;
-	assigned-clocks = <&cru SCLK_MAC2PHY>;
-	assigned-clock-parents = <&cru SCLK_MAC2PHY_SRC>;
-	status = "disabled";
+        phy-supply = <&vcc_phy>;
+        clock_in_out = "output";
+        assigned-clock-rate = <50000000>;
+        assigned-clocks = <&cru SCLK_MAC2PHY>;
+        assigned-clock-parents = <&cru SCLK_MAC2PHY_SRC>;
+        status = "okay";
 };
 
 &hdmi {
@@ -179,6 +154,10 @@
 
 &i2s1 {
 	#sound-dai-cells = <0>;
+	clocks = <&cru SCLK_I2S1>, <&cru HCLK_I2S1_8CH>, <&cru SCLK_I2S1_OUT>;
+	clock-names = "i2s_sclk", "i2s_hclk", "i2s_mclk";
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2s1_mclk &i2s1_sclk &i2s1_lrckrx &i2s1_sdi>;
 	status = "okay";
 };
 
@@ -219,12 +198,6 @@
 &spdif {
 	#sound-dai-cells = <0>;
 	status = "disabled";
-};
-
-&uart1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&uart1_xfer>;
-	status = "okay";
 };
 
 &u2phy {
