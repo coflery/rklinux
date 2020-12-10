@@ -2190,7 +2190,7 @@ static void dw_hdmi_enable_video_path(struct dw_hdmi *hdmi)
 
 	/* Enable color space conversion if needed */
 	if (is_color_space_conversion(hdmi))
-		hdmi_writeb(hdmi, HDMI_MC_FLOWCTRL_FEED_THROUGH_OFF_CSC_IN_PATH,
+		hdmi_writeb(hdmi, HDMI_MC_FLOWCTRL_FEED_THROUGH_OFF_CSC_BYPASS,
 			    HDMI_MC_FLOWCTRL);
 	else
 		hdmi_writeb(hdmi, HDMI_MC_FLOWCTRL_FEED_THROUGH_OFF_CSC_BYPASS,
