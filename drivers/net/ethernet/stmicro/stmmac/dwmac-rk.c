@@ -704,7 +704,7 @@ static const struct rk_gmac_ops rk3308_ops = {
 #define RK3328_GMAC_RXCLK_DLY_DISABLE	GRF_CLR_BIT(0)
 
 /* RK3328_GRF_MACPHY_CON1 */
-#define RK3328_MACPHY_RMII_MODE		GRF_BIT(9)
+#define RK3328_MACPHY_RMII_MODE		(GRF_BIT(9)|GRF_BIT(12)|GRF_BIT(14))
 
 static void rk3328_set_to_rgmii(struct rk_priv_data *bsp_priv,
 				int tx_delay, int rx_delay)
