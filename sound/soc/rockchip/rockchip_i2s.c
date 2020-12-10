@@ -37,6 +37,7 @@ struct rk_i2s_dev {
 
 	struct clk *hclk;
 	struct clk *mclk;
+	struct clk *sclk;
 
 	struct snd_dmaengine_dai_dma_data capture_dma_data;
 	struct snd_dmaengine_dai_dma_data playback_dma_data;
@@ -79,7 +80,7 @@ static int i2s_runtime_resume(struct device *dev)
 
 	ret = clk_prepare_enable(i2s->mclk);
 	if (ret) {
-		dev_err(i2s->dev, "clock enable failed %d\n", ret);
+		dev_err(i2s->dev, "mclock enable failed %d\n", ret);
 		return ret;
 	}
 
@@ -644,7 +645,7 @@ static int rockchip_i2s_probe(struct platform_device *pdev)
 	/* try to prepare related clocks */
 	i2s->hclk = devm_clk_get(&pdev->dev, "i2s_hclk");
 	if (IS_ERR(i2s->hclk)) {
-		dev_err(&pdev->dev, "Can't retrieve i2s bus clock\n");
+		dev_err(&pdev->dev, "Can't retrieve i2s hclock\n");
 		return PTR_ERR(i2s->hclk);
 	}
 	ret = clk_prepare_enable(i2s->hclk);
@@ -653,9 +654,20 @@ static int rockchip_i2s_probe(struct platform_device *pdev)
 		return ret;
 	}
 
-	i2s->mclk = devm_clk_get(&pdev->dev, "i2s_clk");
+	i2s->sclk = devm_clk_get(&pdev->dev, "i2s_sclk");
+	if (IS_ERR(i2s->sclk)) {
+		dev_err(&pdev->dev, "Can't retrieve i2s sclock\n");
+		return PTR_ERR(i2s->sclk);
+	}
+	ret = clk_prepare_enable(i2s->sclk);
+	if (ret) {
+		dev_err(i2s->dev, "sclock enable failed %d\n", ret);
+		return ret;
+	}
+
+	i2s->mclk = devm_clk_get(&pdev->dev, "i2s_mclk");
 	if (IS_ERR(i2s->mclk)) {
-		dev_err(&pdev->dev, "Can't retrieve i2s master clock\n");
+		dev_err(&pdev->dev, "Can't retrieve i2s mclock\n");
 		return PTR_ERR(i2s->mclk);
 	}
 
@@ -765,6 +777,7 @@ static int rockchip_i2s_remove(struct platform_device *pdev)
 		i2s_runtime_suspend(&pdev->dev);
 
 	clk_disable_unprepare(i2s->mclk);
+	clk_disable_unprepare(i2s->sclk);
 	clk_disable_unprepare(i2s->hclk);
 
 	return 0;
