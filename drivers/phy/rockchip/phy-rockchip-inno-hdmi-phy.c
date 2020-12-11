@@ -322,6 +322,21 @@ struct pre_pll_config {
 	u32 fracdiv;
 };
 
+struct rk3328_hdmi_pll_config {
+	unsigned char bus_width;
+	unsigned long pixclock_start;
+	unsigned long pixclock_end;
+	unsigned char tmds_div_a;
+	unsigned char tmds_div_b;
+	unsigned char tmds_div_c;
+	unsigned char pixclk_div_a;
+	unsigned char pixclk_div_b;
+	unsigned char pixclk_div_d;
+	unsigned char vco_div_5_en;
+	unsigned char tmds_div;
+	unsigned char pixclock_div;
+};
+
 struct post_pll_config {
 	unsigned long tmdsclock;
 	u8 prediv;
@@ -349,6 +364,42 @@ struct inno_hdmi_phy_drv_data {
 };
 
 /*
+	bus_width,    pixclock_start, pixclock_end,
+	tmds_div_a,   tmds_div_b,     tmds_div_c,
+	pixclk_div_a, pixclk_div_b,   pixclk_div_d,
+	vco_div_5_en, tmds_div,       pixclock_div;
+*/
+static const struct rk3328_hdmi_pll_config rk3328_hdmi_pll_cfg_table[] ={
+	//8bit Pix_Clock<=340MHz
+	{ 8,  21000000,  25000000,  2, 3, 3,  6, 3, 8, 0, 96,  96},
+	{ 8,  25000000,  40000000,  3, 2, 2,  1, 3, 8, 0, 80,  80},
+	{ 8,  40000000,  50000000,  1, 3, 3,  1, 2, 8, 0, 64,  64},
+	{ 8,  50000000,  80000000,  3, 1, 1,  1, 3, 4, 0, 40,  40},
+	{ 8,  80000000, 100000000,  1, 2, 2,  1, 2, 4, 0, 32,  32},
+	{ 8, 100000000, 130000000,  2, 1, 1,  1, 2, 3, 0, 24,  24},
+	{ 8, 130000000, 200000000,  1, 1, 1,  1, 2, 2, 0, 16,  16},
+	{ 8, 200000000, 260000000,  2, 0, 0,  1, 1, 2, 0, 12,  12},
+	{ 8, 260000000, 340000000,  1, 0, 0,  1, 0, 2, 0,  8,   8},
+	//8bit Pix_Clock>340MHz(TMDS_Data_Clock>340MHz)
+	{ 8, 340000000, 400000000,  1, 2, 0,  1, 0, 2, 0,  8,   8},
+	{ 8, 400000000, 600000000,  0, 2, 0,  1, 0, 1, 0,  4,   4}, // Jitter:vco<2GHz at 400MHz-500MHz
+
+	//10bit Pix_Clock<=272MHz
+	{10,  21000000,  25000000,  3, 2, 2, 10, 3, 5, 0, 80, 100},
+	{10,  25000000,  40000000,  1, 3, 3,  1, 3, 8, 0, 64,  80},
+	{10,  40000000,  50000000,  3, 1, 1,  1, 3, 5, 0, 40,  50},
+	{10,  50000000,  80000000,  1, 2, 2,  1, 3, 4, 0, 32,  40},
+	{10,  80000000, 100000000,  2, 1, 1,  1, 3, 3, 0, 24,  30},
+	{10, 100000000, 160000000,  1, 1, 1,  1, 3, 2, 0, 16,  20},
+	{10, 160000000, 200000000,  1, 0, 0,  1, 3, 1, 0,  8,  10}, // Jitter:vco<2GHz at 160MHz-200MHz
+	{10, 200000000, 272000000,  1, 0, 0,  1, 3, 1, 0,  8,  10},
+	//10bit Pix_Clock>272MHz(TMDS_Data_Clock>340MHz)
+	{10, 272000000, 320000000,  0, 2, 0,  1, 3, 1, 0,  4,  10},
+	{10, 320000000, 600000000,  0, 2, 0,  1, 3, 1, 1,  4,   5}, // Jitter:vco<2GHz at 320MHz-400MHz
+	{ /* sentinel */ }
+};
+
+/*
  * If only using integer freq div can't get frequency we want, frac
  * freq div is needed. For example, pclk 88.75 Mhz and tmdsclk
  * 110.9375 Mhz must use frac div 0xF00000. The actual frequency is different
@@ -356,50 +407,7 @@ struct inno_hdmi_phy_drv_data {
  * the actual tmds clock we get is 110.93719 Mhz. It is important
  * to note that RK322X platforms do not support frac div.
  */
-static const struct pre_pll_config pre_pll_cfg_table[] = {
-	{ 27000000,  27000000, 1,  90, 3, 2, 2, 10, 3, 3,  4, 0, 0},
-	{ 27000000,  33750000, 1,  90, 1, 3, 3, 10, 3, 3,  4, 0, 0},
-	{ 40000000,  40000000, 1,  80, 2, 2, 2, 12, 2, 2,  2, 0, 0},
-	{ 40000000,  50000000, 1, 100, 2, 2, 2,  1, 0, 0, 15, 0, 0},
-	{ 59341000,  59341000, 1,  98, 3, 1, 2,  1, 3, 3,  4, 0, 0xE6AE6B},
-	{ 59400000,  59400000, 1,  99, 3, 1, 1,  1, 3, 3,  4, 0, 0},
-	{ 59341000,  74176250, 1,  98, 0, 3, 3,  1, 3, 3,  4, 0, 0xE6AE6B},
-	{ 59400000,  74250000, 1,  99, 1, 2, 2,  1, 3, 3,  4, 0, 0},
-	{ 65000000,  65000000, 1, 130, 2, 2, 2,  1, 0, 0, 12, 0, 0},
-	{ 65000000,  81250000, 3, 325, 0, 3, 3,  1, 0, 0, 10, 0, 0},
-	{ 71000000,  71000000, 3, 284, 0, 3, 3,  1, 0, 0,  8, 0, 0},
-	{ 71000000,  88750000, 3, 355, 0, 3, 3,  1, 0, 0, 10, 0, 0},
-	{ 74176000,  74176000, 1,  98, 1, 2, 2,  1, 2, 3,  4, 0, 0xE6AE6B},
-	{ 74250000,  74250000, 1,  99, 1, 2, 2,  1, 2, 3,  4, 0, 0},
-	{ 74176000,  92720000, 4, 494, 1, 2, 2,  1, 3, 3,  4, 0, 0x816817},
-	{ 74250000,  92812500, 4, 495, 1, 2, 2,  1, 3, 3,  4, 0, 0},
-	{ 83500000,  83500000, 2, 167, 2, 1, 1,  1, 0, 0,  6, 0, 0},
-	{ 83500000, 104375000, 1, 104, 2, 1, 1,  1, 1, 0,  5, 0, 0x600000},
-	{ 85750000,  85750000, 3, 343, 0, 3, 3,  1, 0, 0,  8, 0, 0},
-	{ 88750000,  88750000, 3, 355, 0, 3, 3,  1, 0, 0,  8, 0, 0},
-	{ 88750000, 110937500, 1, 110, 2, 1, 1,  1, 1, 0,  5, 0, 0xF00000},
-	{108000000, 108000000, 1,  90, 3, 0, 0,  1, 0, 0,  5, 0, 0},
-	{108000000, 135000000, 1,  90, 0, 2, 2,  1, 0, 0,  5, 0, 0},
-	{119000000, 119000000, 1, 119, 2, 1, 1,  1, 0, 0,  6, 0, 0},
-	{119000000, 148750000, 1,  99, 0, 2, 2,  1, 0, 0,  5, 0, 0x2AAAAA},
-	{148352000, 148352000, 1,  98, 1, 1, 1,  1, 2, 2,  2, 0, 0xE6AE6B},
-	{148500000, 148500000, 1,  99, 1, 1, 1,  1, 2, 2,  2, 0, 0},
-	{148352000, 185440000, 4, 494, 0, 2, 2,  1, 3, 2,  2, 0, 0x816817},
-	{148500000, 185625000, 4, 495, 0, 2, 2,  1, 3, 2,  2, 0, 0},
-	{162000000, 162000000, 1, 108, 0, 2, 2,  1, 0, 0,  4, 0, 0},
-	{162000000, 202500000, 1, 135, 0, 2, 2,  1, 0, 0,  5, 0, 0},
-	{296703000, 296703000, 1,  98, 0, 1, 1,  1, 0, 2,  2, 0, 0xE6AE6B},
-	{297000000, 297000000, 1,  99, 0, 1, 1,  1, 0, 2,  2, 0, 0},
-	{296703000, 370878750, 4, 494, 1, 2, 0,  1, 3, 1,  1, 0, 0x816817},
-	{297000000, 371250000, 4, 495, 1, 2, 0,  1, 3, 1,  1, 0, 0},
-	{593407000, 296703500, 1,  98, 0, 1, 1,  1, 0, 2,  1, 0, 0xE6AE6B},
-	{594000000, 297000000, 1,  99, 0, 1, 1,  1, 0, 2,  1, 0, 0},
-	{593407000, 370879375, 4, 494, 1, 2, 0,  1, 3, 1,  1, 1, 0x816817},
-	{594000000, 371250000, 4, 495, 1, 2, 0,  1, 3, 1,  1, 1, 0},
-	{593407000, 593407000, 1,  98, 0, 2, 0,  1, 0, 1,  1, 0, 0xE6AE6B},
-	{594000000, 594000000, 1,  99, 0, 2, 0,  1, 0, 1,  1, 0, 0},
-	{     ~0UL,	    0, 0,   0, 0, 0, 0,  0, 0, 0,  0, 0, 0}
-};
+static struct pre_pll_config pre_pll_cfg_table={ /* sentinel */ };
 
 static const struct post_pll_config post_pll_cfg_table[] = {
 	{33750000,  1, 40, 8, 1},
@@ -600,7 +608,7 @@ static int inno_hdmi_phy_power_on(struct phy *phy)
 		return -EINVAL;
 
 	dev_dbg(inno->dev, "Inno HDMI PHY Power On\n");
-	inno_hdmi_phy_clk_set_rate(&inno->hw, inno->pixclock, 0);
+	inno_hdmi_phy_clk_set_rate(&inno->hw, inno->pixclock, 24000000);
 
 	if (inno->plat_data->ops->power_on)
 		return inno->plat_data->ops->power_on(inno, cfg, phy_cfg);
@@ -627,19 +635,56 @@ static const struct phy_ops inno_hdmi_phy_ops = {
 	.power_off = inno_hdmi_phy_power_off,
 };
 
-static const
+static
 struct pre_pll_config *inno_hdmi_phy_get_pre_pll_cfg(struct inno_hdmi_phy *inno,
-						     unsigned long rate)
+						     unsigned long rate, unsigned long parent_rate)
 {
-	const struct pre_pll_config *cfg = pre_pll_cfg_table;
+	const struct rk3328_hdmi_pll_config *table = rk3328_hdmi_pll_cfg_table;
+	struct pre_pll_config *cfg = &pre_pll_cfg_table;
+	int bus_width = phy_get_bus_width(inno->phy);
 	unsigned long tmdsclock = inno_hdmi_phy_get_tmdsclk(inno, rate);
+	unsigned long pixclock;
+	unsigned char prediv=1;
+	unsigned long fvco;
+	unsigned char fbdiv;
+	unsigned int  fracdiv;
+	unsigned long mod;
 
-	for (; cfg->pixclock != 0; cfg++)
-		if (cfg->pixclock == rate && cfg->tmdsclock == tmdsclock)
+	for(; table->bus_width != 0; table++)
+	{
+		if(bus_width == table->bus_width &&
+			pixclock > table->pixclock_start &&
+			pixclock <= table->pixclock_end)
+		{
 			break;
+		}
+	}
 
-	if (cfg->pixclock == 0)
+	if (table->bus_width == 0)
 		return ERR_PTR(-EINVAL);
+
+	fvco = pixclock * table->pixclock_div;
+
+	mod = do_div(fvco, parent_rate * prediv);
+	fbdiv = fvco;
+
+	mod *= 1<<24;
+	do_div(mod, parent_rate * prediv);
+	fracdiv = mod;
+
+	cfg->pixclock = rate;
+	cfg->tmdsclock = tmdsclock;
+	cfg->prediv = prediv;
+	cfg->fbdiv = fbdiv;
+	cfg->tmds_div_a = table->tmds_div_a;
+	cfg->tmds_div_b = table->tmds_div_b;
+	cfg->tmds_div_c = table->tmds_div_c;
+	cfg->pclk_div_a = table->pixclk_div_a;
+	cfg->pclk_div_b = table->pixclk_div_b;
+	cfg->pclk_div_c = 3;
+	cfg->pclk_div_d = table->pixclk_div_d;
+	cfg->vco_div_5_en = table->vco_div_5_en;
+	cfg->fracdiv = fracdiv;
 
 	return cfg;
 }
@@ -725,36 +770,38 @@ static unsigned long inno_hdmi_phy_clk_recalc_rate(struct clk_hw *hw,
 static long inno_hdmi_phy_clk_round_rate(struct clk_hw *hw, unsigned long rate,
 					 unsigned long *parent_rate)
 {
-	const struct pre_pll_config *cfg = pre_pll_cfg_table;
+	const struct rk3328_hdmi_pll_config *table = rk3328_hdmi_pll_cfg_table;
 
 	rate = (rate / 1000) * 1000;
 
-	for (; cfg->pixclock != 0; cfg++)
-		if (cfg->pixclock == rate)
+	for(; table->bus_width != 0; table++)
+	{
+		if(rate > table->pixclock_start && rate <= table->pixclock_end)
 			break;
+	}
 
-	if (cfg->pixclock == 0)
+	if (table->bus_width == 0)
 		return -EINVAL;
 
-	return cfg->pixclock;
+	return rate;
 }
 
 static int inno_hdmi_phy_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 				      unsigned long parent_rate)
 {
 	struct inno_hdmi_phy *inno = to_inno_hdmi_phy(hw);
-	const struct pre_pll_config *cfg = pre_pll_cfg_table;
+	struct pre_pll_config *cfg = &pre_pll_cfg_table;
 	unsigned long tmdsclock = inno_hdmi_phy_get_tmdsclk(inno, rate);
 	u32 val;
 	int ret;
 
-	dev_dbg(inno->dev, "%s rate %lu tmdsclk %lu\n",
+	dev_dbg(inno->dev, "%s rate=%lu tmdsclk=%lu\n",
 		__func__, rate, tmdsclock);
 
 	if (inno->pixclock == rate && inno->tmdsclock == tmdsclock)
 		return 0;
 
-	cfg = inno_hdmi_phy_get_pre_pll_cfg(inno, rate);
+	cfg = inno_hdmi_phy_get_pre_pll_cfg(inno, rate, parent_rate);
 	if (IS_ERR(cfg))
 		return PTR_ERR(cfg);
 
