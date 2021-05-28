@@ -4270,7 +4270,7 @@ static void drm_parse_hdmi_deep_color_info(struct drm_connector *connector,
 	unsigned int dc_bpc = 0;
 
 	/* HDMI supports at least 8 bpc */
-	info->bpc = 8;
+	info->bpc = 10;
 
 	if (cea_db_payload_len(hdmi) < 6)
 		return;
@@ -4397,7 +4397,7 @@ static void drm_add_display_info(struct drm_connector *connector,
 	info->cea_rev = 0;
 	info->max_tmds_clock = 0;
 	info->dvi_dual = false;
-	info->edid_hdmi_dc_modes = 0;
+	info->edid_hdmi_dc_modes = DRM_EDID_HDMI_DC_30;
 
 	memset(&info->hdmi, 0, sizeof(info->hdmi));
 

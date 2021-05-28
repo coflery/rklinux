@@ -370,6 +370,19 @@ struct inno_hdmi_phy_drv_data {
 	vco_div_5_en, tmds_div,       pixclock_div;
 */
 static const struct rk3328_hdmi_pll_config rk3328_hdmi_pll_cfg_table[] ={
+	//10bit Pix_Clock<=272MHz
+	{10,  21000000,  25000000,  3, 2, 2, 10, 3, 5, 0, 80, 100},
+	{10,  25000000,  40000000,  1, 3, 3,  1, 3, 8, 0, 64,  80},
+	{10,  40000000,  50000000,  3, 1, 1,  1, 3, 5, 0, 40,  50},
+	{10,  50000000,  80000000,  1, 2, 2,  1, 3, 4, 0, 32,  40},
+	{10,  80000000, 100000000,  2, 1, 1,  1, 3, 3, 0, 24,  30},
+	{10, 100000000, 160000000,  1, 1, 1,  1, 3, 2, 0, 16,  20},
+	{10, 160000000, 200000000,  1, 0, 0,  1, 3, 1, 0,  8,  10}, // Jitter:vco<2GHz at 160MHz-200MHz
+	{10, 200000000, 272000000,  1, 0, 0,  1, 3, 1, 0,  8,  10},
+	//10bit Pix_Clock>272MHz(TMDS_Data_Clock>340MHz)
+	{10, 272000000, 320000000,  0, 1, 1,  1, 3, 1, 0,  8,  10},
+	{10, 320000000, 600000000,  0, 0, 0,  1, 3, 1, 1,  4,   5}, // Jitter:vco<2GHz at 320MHz-400MHz
+
 	//8bit Pix_Clock<=340MHz
 	{ 8,  21000000,  25000000,  2, 3, 3,  6, 3, 8, 0, 96,  96},
 	{ 8,  25000000,  40000000,  3, 2, 2,  1, 3, 8, 0, 80,  80},
@@ -381,21 +394,8 @@ static const struct rk3328_hdmi_pll_config rk3328_hdmi_pll_cfg_table[] ={
 	{ 8, 200000000, 260000000,  2, 0, 0,  1, 1, 2, 0, 12,  12},
 	{ 8, 260000000, 340000000,  1, 0, 0,  1, 0, 2, 0,  8,   8},
 	//8bit Pix_Clock>340MHz(TMDS_Data_Clock>340MHz)
-	{ 8, 340000000, 400000000,  1, 2, 0,  1, 0, 2, 0,  8,   8},
-	{ 8, 400000000, 600000000,  0, 2, 0,  1, 0, 1, 0,  4,   4}, // Jitter:vco<2GHz at 400MHz-500MHz
-
-	//10bit Pix_Clock<=272MHz
-	{10,  21000000,  25000000,  3, 2, 2, 10, 3, 5, 0, 80, 100},
-	{10,  25000000,  40000000,  1, 3, 3,  1, 3, 8, 0, 64,  80},
-	{10,  40000000,  50000000,  3, 1, 1,  1, 3, 5, 0, 40,  50},
-	{10,  50000000,  80000000,  1, 2, 2,  1, 3, 4, 0, 32,  40},
-	{10,  80000000, 100000000,  2, 1, 1,  1, 3, 3, 0, 24,  30},
-	{10, 100000000, 160000000,  1, 1, 1,  1, 3, 2, 0, 16,  20},
-	{10, 160000000, 200000000,  1, 0, 0,  1, 3, 1, 0,  8,  10}, // Jitter:vco<2GHz at 160MHz-200MHz
-	{10, 200000000, 272000000,  1, 0, 0,  1, 3, 1, 0,  8,  10},
-	//10bit Pix_Clock>272MHz(TMDS_Data_Clock>340MHz)
-	{10, 272000000, 320000000,  0, 2, 0,  1, 3, 1, 0,  4,  10},
-	{10, 320000000, 600000000,  0, 2, 0,  1, 3, 1, 1,  4,   5}, // Jitter:vco<2GHz at 320MHz-400MHz
+	{ 8, 340000000, 400000000,  0, 3, 1,  1, 0, 2, 0,  8,   8},
+	{ 8, 400000000, 600000000,  0, 2, 0,  1, 0, 1, 0,  4,   4}, // Jitter:vco<2GHz at 400MHz-500MHzi
 	{ /* sentinel */ }
 };
 
@@ -496,29 +496,29 @@ static inline void inno_update_bits(struct inno_hdmi_phy *inno, u8 reg,
 	regmap_read_poll_timeout((inno)->regmap, (reg) * 4, val, cond, \
 				 sleep_us, timeout_us)
 
-static u32 inno_hdmi_phy_get_tmdsclk(struct inno_hdmi_phy *inno, int rate)
+static unsigned int inno_hdmi_phy_get_tmdsclk(struct inno_hdmi_phy *inno, unsigned int rate)
 {
 	int bus_width = phy_get_bus_width(inno->phy);
-	u32 tmdsclk;
+	unsigned int tmdsclk;
 
 	switch (bus_width) {
 	case 4:
-		tmdsclk = (u32)rate / 2;
+		tmdsclk = rate / 2;
 		break;
 	case 5:
-		tmdsclk = (u32)rate * 5 / 8;
+		tmdsclk = rate * 5 / 8;
 		break;
 	case 6:
-		tmdsclk = (u32)rate * 3 / 4;
+		tmdsclk = rate * 3 / 4;
 		break;
 	case 10:
-		tmdsclk = (u32)rate * 5 / 4;
+		tmdsclk = rate * 5 / 4;
 		break;
 	case 12:
-		tmdsclk = (u32)rate * 3 / 2;
+		tmdsclk = rate * 3 / 2;
 		break;
 	case 16:
-		tmdsclk = (u32)rate * 2;
+		tmdsclk = rate * 2;
 		break;
 	default:
 		tmdsclk = rate;
@@ -637,13 +637,12 @@ static const struct phy_ops inno_hdmi_phy_ops = {
 
 static
 struct pre_pll_config *inno_hdmi_phy_get_pre_pll_cfg(struct inno_hdmi_phy *inno,
-						     unsigned long rate, unsigned long parent_rate)
+						     unsigned long pixclock, unsigned long parent_rate)
 {
 	const struct rk3328_hdmi_pll_config *table = rk3328_hdmi_pll_cfg_table;
 	struct pre_pll_config *cfg = &pre_pll_cfg_table;
 	int bus_width = phy_get_bus_width(inno->phy);
-	unsigned long tmdsclock = inno_hdmi_phy_get_tmdsclk(inno, rate);
-	unsigned long pixclock;
+	unsigned long tmdsclock = inno_hdmi_phy_get_tmdsclk(inno, pixclock);
 	unsigned char prediv=1;
 	unsigned long fvco;
 	unsigned char fbdiv;
@@ -661,7 +660,10 @@ struct pre_pll_config *inno_hdmi_phy_get_pre_pll_cfg(struct inno_hdmi_phy *inno,
 	}
 
 	if (table->bus_width == 0)
+	{
+		printk("FAIL:inno_hdmi_phy_get_pre_pll_cfg:\nbus_width=%d,pixclock=%lu\n",bus_width,pixclock);
 		return ERR_PTR(-EINVAL);
+	}
 
 	fvco = pixclock * table->pixclock_div;
 
@@ -672,7 +674,7 @@ struct pre_pll_config *inno_hdmi_phy_get_pre_pll_cfg(struct inno_hdmi_phy *inno,
 	do_div(mod, parent_rate * prediv);
 	fracdiv = mod;
 
-	cfg->pixclock = rate;
+	cfg->pixclock = pixclock;
 	cfg->tmdsclock = tmdsclock;
 	cfg->prediv = prediv;
 	cfg->fbdiv = fbdiv;
@@ -685,6 +687,8 @@ struct pre_pll_config *inno_hdmi_phy_get_pre_pll_cfg(struct inno_hdmi_phy *inno,
 	cfg->pclk_div_d = table->pixclk_div_d;
 	cfg->vco_div_5_en = table->vco_div_5_en;
 	cfg->fracdiv = fracdiv;
+
+	printk("xiaoren:inno_hdmi_phy_get_pre_pll_cfg:\nbus_width=%d,pixclock=%lu,tmds=%lu\n",bus_width,pixclock,tmdsclock);
 
 	return cfg;
 }
@@ -781,7 +785,12 @@ static long inno_hdmi_phy_clk_round_rate(struct clk_hw *hw, unsigned long rate,
 	}
 
 	if (table->bus_width == 0)
+	{
+		printk("FAIL:inno_hdmi_phy_clk_round_rate:\nbus_width=%d,rate=%lu\n",table->bus_width,rate);
 		return -EINVAL;
+	}
+
+	printk("xiaoren:inno_hdmi_phy_clk_round_rate:\nbus_width=%d,rate=%lu\n",table->bus_width,rate);
 
 	return rate;
 }
@@ -798,8 +807,8 @@ static int inno_hdmi_phy_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 	dev_dbg(inno->dev, "%s rate=%lu tmdsclk=%lu\n",
 		__func__, rate, tmdsclock);
 
-	if (inno->pixclock == rate && inno->tmdsclock == tmdsclock)
-		return 0;
+	//if (inno->pixclock == rate && inno->tmdsclock == tmdsclock)
+	//	return 0;
 
 	cfg = inno_hdmi_phy_get_pre_pll_cfg(inno, rate, parent_rate);
 	if (IS_ERR(cfg))

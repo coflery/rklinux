@@ -540,6 +540,12 @@ dw_hdmi_rockchip_mode_valid(struct drm_connector *connector,
 	     !connector->ycbcr_420_allowed))
 		return MODE_BAD;
 
+	printk("xiaoren:clock=%d,max_tmds_clock=%d,is420=%d,%d\n",
+	mode->clock,
+	connector->display_info.max_tmds_clock,
+	drm_mode_is_420(&connector->display_info, mode),
+	connector->ycbcr_420_allowed);
+
 	if (!encoder) {
 		const struct drm_connector_helper_funcs *funcs;
 
@@ -575,6 +581,7 @@ dw_hdmi_rockchip_mode_valid(struct drm_connector *connector,
 
 		status = funcs->mode_valid(crtc, mode,
 					   DRM_MODE_CONNECTOR_HDMIA);
+		printk("xiaoren:status=%d,clock=%d,crtc_clock=%d\n",status,mode->clock,mode->crtc_clock);
 		if (status != MODE_OK)
 			return status;
 	}
@@ -611,6 +618,7 @@ static void dw_hdmi_rockchip_encoder_enable(struct drm_encoder *encoder)
 	if (WARN_ON(!crtc || !crtc->state))
 		return;
 
+	printk("xiaoren:dw_hdmi_rockchip_encoder_enable,phy_bus_width=%d,crtc_clock=%d\n",hdmi->phy_bus_width,crtc->state->adjusted_mode.crtc_clock * 1000);
 	if (hdmi->phy)
 		phy_set_bus_width(hdmi->phy, hdmi->phy_bus_width);
 
@@ -743,6 +751,12 @@ dw_hdmi_rockchip_select_output(struct drm_connector_state *conn_state,
 	else
 		*color_depth = 8;
 
+	printk("xiaoren:select_output1,colordepth=%u,support_dc=%u,color_depth=%u,color_format=%u\n",
+			hdmi->colordepth,
+			support_dc,
+			*color_depth,
+			*color_format);
+
 	*eotf = TRADITIONAL_GAMMA_SDR;
 	if (conn_state->hdr_source_metadata_blob_ptr) {
 		hdr_metadata = (struct hdr_static_metadata *)
@@ -802,6 +816,8 @@ dw_hdmi_rockchip_select_output(struct drm_connector_state *conn_state,
 		break;
 	}
 
+	printk("xiaoren:select_output2,color_depth=%u\n",*color_depth);
+
 	if (tmdsclock > max_tmds_clock) {
 		if (max_tmds_clock >= 594000) {
 			*color_depth = 8;
@@ -814,6 +830,11 @@ dw_hdmi_rockchip_select_output(struct drm_connector_state *conn_state,
 				*color_format = DRM_HDMI_OUTPUT_YCBCR420;
 		}
 	}
+	printk("xiaoren:select_output3,tmdsclock=%lu,max_tmds_clock=%d,color_depth=%d,color_format=%d\n",
+	tmdsclock,
+	max_tmds_clock,
+	*color_depth,
+	*color_format);
 }
 
 static int
@@ -856,6 +877,9 @@ dw_hdmi_rockchip_encoder_atomic_check(struct drm_encoder *encoder,
 		else
 			bus_width = colordepth;
 	}
+
+	printk("xiaoren:encoder_atomic_check:colordepth=%u,colorformat=%u,bus_width=%u\n",
+		colordepth,colorformat,bus_width);
 
 	hdmi->phy_bus_width = bus_width;
 	if (hdmi->phy)
@@ -964,6 +988,8 @@ dw_hdmi_rockchip_attatch_properties(struct drm_connector *connector,
 	struct rockchip_hdmi *hdmi = (struct rockchip_hdmi *)data;
 	struct drm_property *prop;
 
+	color = MEDIA_BUS_FMT_YUV10_1X30;
+
 	switch (color) {
 	case MEDIA_BUS_FMT_RGB101010_1X30:
 		hdmi->hdmi_output = DRM_HDMI_OUTPUT_DEFAULT_RGB;
@@ -997,6 +1023,8 @@ dw_hdmi_rockchip_attatch_properties(struct drm_connector *connector,
 		hdmi->hdmi_output = DRM_HDMI_OUTPUT_DEFAULT_RGB;
 		hdmi->colordepth = 8;
 	}
+
+	printk("xiaoren:dw_hdmi_rockchip_attatch_properties:color=%u,colordepth=%d\n",color,hdmi->colordepth);
 
 	/* RK3368 does not support deep color mode */
 	if (!hdmi->color_depth_property && hdmi->dev_type != RK3368_HDMI) {
@@ -1195,6 +1223,7 @@ dw_hdmi_rockchip_get_property(struct drm_connector *connector,
 		return 0;
 	} else if (property == hdmi->quant_range) {
 		*val = hdmi->hdmi_quant_range;
+		printk("xiaoren:quant_range=%llu\n",*val);
 		return 0;
 	}
 

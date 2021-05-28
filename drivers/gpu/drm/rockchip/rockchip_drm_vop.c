@@ -1104,11 +1104,14 @@ static int vop_csc_atomic_check(struct drm_crtc *crtc,
 		if (ret)
 			return ret;
 
-		vop_setup_csc_mode(is_input_yuv, s->yuv_overlay,
-				   vop_plane_state->color_space, s->color_space,
-				   &vop_plane_state->y2r_en,
-				   &vop_plane_state->r2y_en,
-				   &vop_plane_state->csc_mode);
+		if(pstate->fb->pixel_format != DRM_FORMAT_NV24_10)
+		{
+			vop_setup_csc_mode(is_input_yuv, s->yuv_overlay,
+					vop_plane_state->color_space, s->color_space,
+					&vop_plane_state->y2r_en,
+					&vop_plane_state->r2y_en,
+					&vop_plane_state->csc_mode);
+		}
 
 		if (csc_table) {
 			vop_plane_state->y2r_en = !!vop_plane_state->y2r_table;
@@ -1578,6 +1581,7 @@ static int vop_plane_atomic_check(struct drm_plane *plane,
 		return -EINVAL;
 	}
 
+	printk("vop_plane_atomic_check:pixel_format=%d,vop_plane_state->format=%d\n",fb->pixel_format,vop_plane_state->format);
 	offset = (src->x1 >> 16) * drm_format_plane_bpp(fb->pixel_format, 0) / 8;
 	vop_plane_state->offset = offset + fb->offsets[0];
 	if (state->rotation & BIT(DRM_REFLECT_Y) ||
@@ -1603,6 +1607,8 @@ static int vop_plane_atomic_check(struct drm_plane *plane,
 		dma_addr += offset + fb->offsets[1];
 		vop_plane_state->uv_mst = dma_addr;
 	}
+
+	printk("vop_plane_atomic_check:drm_format_plane_bpp=%d\n",drm_format_plane_bpp(fb->pixel_format, 1));
 
 	vop_plane_state->enable = true;
 
@@ -1705,6 +1711,8 @@ static void vop_plane_atomic_update(struct drm_plane *plane,
 	if (!crtc)
 		return;
 
+	printk("xiaoren:vop_plane_atomic_update\n");
+
 	if (!vop_plane_state->enable) {
 		vop_plane_atomic_disable(plane, old_state);
 		return;
@@ -1776,6 +1784,11 @@ static void vop_plane_atomic_update(struct drm_plane *plane,
 	    VOP_MAJOR(vop->version) == 3)
 		rb_swap = !rb_swap;
 	VOP_WIN_SET(vop, win, rb_swap, rb_swap);
+
+
+	printk("vop_plane_atomic_update:fb->pixel_format=%d,fmt_10=%d,rb_swap=%d,vop_plane_state->format=%d\n",
+	fb->pixel_format,is_yuv_10bit(fb->pixel_format),rb_swap,vop_plane_state->format);
+
 
 	global_alpha_en = (vop_plane_state->global_alpha == 0xff) ? 0 : 1;
 	if ((is_alpha_support(fb->pixel_format) || global_alpha_en) &&
@@ -2332,6 +2345,7 @@ vop_crtc_mode_valid(struct drm_crtc *crtc, const struct drm_display_mode *mode,
 	if (mode->flags & DRM_MODE_FLAG_DBLCLK)
 		request_clock *= 2;
 	clock = clk_round_rate(vop->dclk, request_clock * 1000) / 1000;
+	printk("xiaoren:vop_clock=%d,request_clock=%d\n",clock,request_clock);
 
 	/*
 	 * Hdmi or DisplayPort request a Accurate clock.
@@ -2566,6 +2580,7 @@ static bool vop_crtc_mode_fixup(struct drm_crtc *crtc,
 
 	adj_mode->crtc_clock =
 		clk_round_rate(vop->dclk, adj_mode->crtc_clock * 1000) / 1000;
+	printk("xiaoren:vop_crtc_mode_fixup=%d\n",adj_mode->crtc_clock);
 
 	return true;
 }

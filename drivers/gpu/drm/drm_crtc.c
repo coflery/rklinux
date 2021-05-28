@@ -2699,7 +2699,10 @@ int drm_plane_check_pixel_format(const struct drm_plane *plane, u32 format)
 {
 	unsigned int i;
 
-	for (i = 0; i < plane->format_count; i++) {
+	printk("xiaoren:drm_plane_check_pixel_format:format=%s\n",drm_get_format_name(format));
+	for (i = 0; i < plane->format_count; i++)
+	{
+		printk("format_types=%s\n", drm_get_format_name(plane->format_types[i]));
 		if (format == plane->format_types[i])
 			return 0;
 	}
@@ -3409,6 +3412,7 @@ uint32_t drm_mode_legacy_fb_format(uint32_t bpp, uint32_t depth)
 		break;
 	}
 
+	printk("xiaoren:drm_mode_legacy_fb_format:bpp=%d,depth%d\n",bpp,depth);
 	return fmt;
 }
 EXPORT_SYMBOL(drm_mode_legacy_fb_format);
@@ -5970,6 +5974,8 @@ void drm_fb_get_bpp_depth(uint32_t format, unsigned int *depth,
 		*bpp = 0;
 		break;
 	}
+	printk("xiaoren:drm_fb_get_bpp_depth:format=%s,depth=%u,bpp=%d\n",
+	drm_get_format_name(format),*depth,*bpp);
 }
 EXPORT_SYMBOL(drm_fb_get_bpp_depth);
 

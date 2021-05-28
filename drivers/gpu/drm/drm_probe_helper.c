@@ -244,6 +244,7 @@ static int drm_helper_probe_single_connector_modes_merge_bits(struct drm_connect
 		if (mode->status == MODE_OK)
 			mode->status = drm_mode_validate_ycbcr420(mode,
 								  connector);
+		printk("xiaoren:mode=%d\n",mode->status);
 	}
 
 prune:
